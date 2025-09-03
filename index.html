@@ -1,0 +1,107 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Floor Plan Editor</title>
+    <link rel="stylesheet" href="styles.css" />
+    <script src="https://unpkg.com/konva@9.3.15/konva.min.js"></script>
+  </head>
+  <body>
+    <div class="top-toolbar">
+      <button onclick="buttonClickEventHandler({type: 'rectangle'})">
+        Add Rectangle
+      </button>
+      <button onclick="buttonClickEventHandler({type: 'circle'})">
+        Add Circle
+      </button>
+      <button onclick="buttonClickEventHandler({type: 'oval'})">
+        Add Oval
+      </button>
+      <button onclick="importImage()">Import Layout</button>
+      <button class="primary" onclick="saveFloorPlanToLocalStorage()">
+        Export Data
+      </button>
+      <button class="primary" onclick="loadFloorPlanFromLocalStorage()">
+        Import Data
+      </button>
+      <button class="primary" onclick="resetStageView()">Reset View</button>
+    </div>
+
+    <div class="main-content">
+      <div id="container"></div>
+      <div class="sidebar">
+        <div id="selection-panel">
+          <div id="properties-panel">
+            <div class="property-group">
+              <h3 id="selected-item-id"></h3>
+            </div>
+
+            <div id="rect-controls" class="property-group">
+              <div>
+                <label for="input-tableNo">Table No</label
+                ><input id="input-tableNo" type="number" min="1" max="999" />
+              </div>
+              <div>
+                <label for="input-seatCount">Circle Seats</label
+                ><input
+                  type="number"
+                  id="input-seatCount"
+                  placeholder="Enter seat count"
+                  min="1"
+                  max="20"
+                />
+              </div>
+
+              <label>Seats Per Side</label>
+              <div class="input-grid">
+                <div>
+                  <label for="input-top">Top</label
+                  ><input id="input-top" type="number" min="0" />
+                </div>
+                <div>
+                  <label for="input-bottom">Bottom</label
+                  ><input id="input-bottom" type="number" min="0" />
+                </div>
+                <div>
+                  <label for="input-left">Left</label
+                  ><input id="input-left" type="number" min="0" />
+                </div>
+                <div>
+                  <label for="input-right">Right</label
+                  ><input id="input-right" type="number" min="0" />
+                </div>
+              </div>
+            </div>
+
+            <!-- <div id="circle-controls" class="property-group">
+              <label for="input-circle-seats">Total Seats</label>
+              <input id="input-circle-seats" type="number" min="1" />
+            </div>
+
+            <div id="common-table-controls" class="property-group">
+              <label for="input-start-number">Starting Seat Number</label>
+              <input id="input-start-number" type="number" value="1" min="1" />
+              <button
+                onclick="renumberSelectedSeats()"
+                style="width: 100%; margin-top: 10px"
+              >
+                Renumber Seats
+              </button>
+            </div> -->
+
+            <div class="property-group">
+              <button id="delete-button" onclick="deleteSelected()">
+                Delete Item
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <input type="file" id="imageInput" accept="image/*" style="display: none" />
+
+    <script src="Table.js"></script>
+  </body>
+</html>
