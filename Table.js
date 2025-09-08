@@ -334,12 +334,20 @@ function addSeatToGroup(group, x, y, radius, number, seatSide, state = true) {
   group.add(label);
 
   seat.on("click", function () {
-    const currentState = seat.getAttr("isAvailable") ?? true;
-    seat.setAttr("isAvailable", !currentState);
-    const colorKey = !currentState ? "available" : "unavailable";
-    seat.fill(seatColors[colorKey]);
-    tableLayer.batchDraw();
+    toggleSeatAvailability(seat, seatColors);
   });
+
+  seat.on("tap", function () {
+    toggleSeatAvailability(seat, seatColors);
+  });
+}
+
+function toggleSeatAvailability(seat, seatColors) {
+  const currentState = seat.getAttr("isAvailable") ?? true;
+  seat.setAttr("isAvailable", !currentState);
+  const colorKey = !currentState ? "available" : "unavailable";
+  seat.fill(seatColors[colorKey]);
+  tableLayer.batchDraw();
 }
 
 function addSeatsAroundCircle(
@@ -763,6 +771,86 @@ stage.on("wheel", function (e) {
   };
   stage.position(newPos);
   stage.batchDraw();
+});
+
+let lastDist = 0;
+let lastCenter = null;
+
+function getDistance(p1, p2) {
+  return Math.sqrt(Math.pow(p1.x - p2.x, 2) + Math.pow(p1.y - p2.y, 2));
+}
+
+function getCenter(p1, p2) {
+  return {
+    x: (p1.x + p2.x) / 2,
+    y: (p1.y + p2.y) / 2,
+  };
+}
+
+// Reset on touchstart
+stage.on("touchstart", function () {
+  lastDist = 0;
+  lastCenter = null;
+});
+
+// Smooth pinch-to-zoom
+stage.on("touchmove", function (e) {
+  const touch1 = e.evt.touches?.[0];
+  const touch2 = e.evt.touches?.[1];
+
+  if (touch1 && touch2) {
+    e.evt.preventDefault();
+
+    const p1 = { x: touch1.clientX, y: touch1.clientY };
+    const p2 = { x: touch2.clientX, y: touch2.clientY };
+
+    const dist = getDistance(p1, p2);
+    const center = getCenter(p1, p2);
+
+    if (!lastDist || !lastCenter) {
+      lastDist = dist;
+      lastCenter = center;
+      return;
+    }
+
+    // Zoom ratio (gentle zoom factor)
+    const scaleBy = dist / lastDist;
+    const oldScale = stage.scaleX();
+    let newScale = oldScale * scaleBy;
+
+    // Clamp zoom limits
+    newScale = Math.max(0.5, Math.min(2.5, newScale));
+
+    // Get pointer position relative to stage
+    const pointer = stage.getPointerPosition();
+    if (!pointer) return;
+
+    const mousePointTo = {
+      x: (pointer.x - stage.x()) / oldScale,
+      y: (pointer.y - stage.y()) / oldScale,
+    };
+
+    // Apply zoom
+    stage.scale({ x: newScale, y: newScale });
+
+    // Keep the zoom centered around the gesture
+    const newPos = {
+      x: pointer.x - mousePointTo.x * newScale,
+      y: pointer.y - mousePointTo.y * newScale,
+    };
+
+    stage.position(newPos);
+    stage.batchDraw();
+
+    // Update for next frame
+    lastDist = dist;
+    lastCenter = center;
+  }
+});
+
+stage.on("touchend", function () {
+  lastDist = 0;
+  lastCenter = null;
 });
 
 function resetStageView() {
@@ -1231,4 +1319,9 @@ function formatTime(seconds) {
 
 function padZero(num) {
   return num < 10 ? `0${num}` : `${num}`;
+}
+
+function toggleSidebar() {
+  const sidebar = document.querySelector(".sidebar");
+  sidebar.classList.toggle("open");
 }
